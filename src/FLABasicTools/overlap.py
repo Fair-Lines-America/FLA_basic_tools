@@ -88,8 +88,8 @@ def getData(State=None):
 def Overlap_old_new(new_districts, geoid='GEOID', district='District', leg=None):
 
 #####  CHECKS  ######
-    if leg not in ['CD116','SLDU18','SLDL18'] or leg is None:
-        raise Exception('Please Choose Legislative level Default CD')
+    if leg not in ['CD116','SLDU18','SLDL18']:
+        raise Exception('Please Choose Legislative level Default \'CD116\',\'SLDU18\',\'SLDL18\'')
     if not isinstance(new_districts ,pd.DataFrame):
         raise Exception('Please Supply a path to a CSV or DataFrame for new districts')
     if district not in new_districts.columns:

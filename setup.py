@@ -9,7 +9,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 setup(
     
     name='FLABasicTools',  
-    version='0.1.0',  
+    version='0.1.1',  
     description='Basic tools for redistrict data used in reports', 
     long_description=long_description, 
     long_description_content_type='text/markdown', 

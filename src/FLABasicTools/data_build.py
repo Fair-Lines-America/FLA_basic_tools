@@ -52,7 +52,7 @@ def get_census_shp(fips=False, Geography=None, year=datetime.now().year-1):
 
 
 def assign_baf(baf, state, disid, geoid=None):
-    if isinstance(baf, pd.DataFrame) and (geoid is None or  len(baf[geoid].iloc[0]) != 15):
+    if isinstance(baf, pd.DataFrame) and (geoid is None and len(baf[geoid].iloc[0]) != 15):
         raise Exception('Need to include 15 digit GEOID for joiner')
     if isinstance(baf, gpd.GeoDataFrame) and 'geometry' not in baf.columns:
         raise Exception('Geopandas DataFrame need Geometry Column')
