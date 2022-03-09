@@ -6,13 +6,16 @@ import wget
 import os
 import requests
 from datetime import datetime
+from zipfile import ZipFile
+from urllib.request import urlopen  
 ########   
 #Data retrive / Data build Functions
 ########
+states_df = r'https://raw.githubusercontent.com/Fair-Lines-America/FLA_basic_tools/main/data/us-state-ansi-fips.csv'
 def get_census_shp(fips=False, Geography=None, year=datetime.now().year-1):
     if year < 2008:
         raise Exception('Pre 2008 Tiger Files either do not existis or are not in common formate')
-    stateList = pd.read_csv('us-state-ansi-fips.csv', dtype=str, skipinitialspace=True)
+    stateList = pd.read_csv(states_df, dtype=str, skipinitialspace=True)
     base = f'https://www2.census.gov/geo/tiger/TIGER{year}/'
     if Geography is None:
         res = requests.get(base)
@@ -45,7 +48,7 @@ def get_census_shp(fips=False, Geography=None, year=datetime.now().year-1):
             fips = fips['st'].values[0]
     for i in zip_list:
         if fips in i.split('_') or 'us' in i.split('_'):
-            gdf = gpd.read_file(f'{url}{i}')
+            gdf = gpd.read_file(f'{url}{i}', dtype={'GEOID20':str})
             return gdf
 
 
@@ -56,7 +59,7 @@ def assign_baf(baf, state, disid, geoid=None):
         raise Exception('Need to include 15 digit GEOID for joiner')
     if isinstance(baf, gpd.GeoDataFrame) and 'geometry' not in baf.columns:
         raise Exception('Geopandas DataFrame need Geometry Column')
-
+    baf[geoid] = baf[geoid].astype('str')
     if isinstance(baf, gpd.GeoDataFrame):
         blk_df = get_census_shp(fips=state, Geography='TABBLOCK20')
         geoid = 'GEOID20'
@@ -70,7 +73,6 @@ def assign_baf(baf, state, disid, geoid=None):
         blk_df = blk_df.rename(columns={'GEOID20':geoid})
         out_df = blk_df.merge(baf, on=geoid)
         out_shp = out_df[[disid,'geometry']]
-        out_shp = out_shp.dissolve(disid)
         out_shp.to_file(f'geo_{state}_baf.shp')
     return out_df
         

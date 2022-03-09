@@ -7,6 +7,12 @@ import os
 import requests
 from datetime import datetime
 import json
+from zipfile import ZipFile
+from urllib.request import urlopen 
+
+place_ref = r'https://github.com/Fair-Lines-America/FLA_basic_tools/blob/main/data/place_ref.zip?raw=true'
+vtd_ref = r'https://github.com/Fair-Lines-America/FLA_basic_tools/blob/main/data/vtd_ref.zip?raw=true'
+mil_ref = r'https://raw.githubusercontent.com/Fair-Lines-America/FLA_basic_tools/main/data/mil_ref.csv'
 ########
 #Helper Functions
 ########
@@ -31,8 +37,8 @@ def community_split(distr, geoid, disid):
         raise Exception('distr is not a Dataframe')
     url_base = 'https://www2.census.gov/geo/tiger/TIGER2020/'
     f = None 
-    if len(distr.columns) != 2:
-        raise Exception('Please clean Dataframe so only 2 columns GEOID and District ID are included')
+    distr = distr[[disid,geoid]]
+    distr = distr.astype(str)
     if len(distr[geoid].iloc[0]) < 15:
         raise Exception('GEOID column not in 15 digital Geocode for Census Blocks')
     state = distr[geoid].iloc[0][:2]
@@ -80,6 +86,10 @@ def community_split(distr, geoid, disid):
     for i in r:
         del out_county['County_List'][i]
 #### EXTERNAL FILES FOR REFERNCE NEEDED ####
+    url = urlopen(place_ref)
+    output = open('place_ref.zip', 'wb')    # note the flag:  "wb"        
+    output.write(url.read())
+    output.close()
     df_place = pd.read_csv('place_ref.zip', dtype=str)
     df_place = distr.merge(df_place, left_on='GEOID20', right_on='GEOID20_0KM', suffixes=('_d', '') )
     df_place = df_place.drop(columns=['GEOID20_d','GEOID20_0KM'])
@@ -107,7 +117,7 @@ def community_split(distr, geoid, disid):
             r.append(key)
     for i in r:
         del out_place['Place_List'][i]
-    df_mil = pd.read_csv('mil_ref.csv', dtype=str)
+    df_mil = pd.read_csv(mil_ref, dtype=str)
     df_mil = distr.merge(df_mil, left_on='GEOID20', right_on='GEOID20_0KM', suffixes=('', '') )
     df_mil = df_mil.drop(columns=['GEOID20','GEOID20_0KM'])
     district_list = list(set(df_mil['AREAID'].values.tolist()))
@@ -134,6 +144,10 @@ def community_split(distr, geoid, disid):
             r.append(key)
     for i in r:
         del out_mil['Mil_List'][i]
+    url = urlopen(vtd_ref)
+    output = open('vtd_ref.zip', 'wb')    # note the flag:  "wb"        
+    output.write(url.read())
+    output.close()
     df_vtd = pd.read_csv('vtd_ref.zip', dtype=str)
     df_vtd = distr.merge(df_vtd, left_on='GEOID20', right_on='GEOID20', suffixes=('_d', '') )
     df_vtd = df_vtd.drop(columns=['GEOID20'])

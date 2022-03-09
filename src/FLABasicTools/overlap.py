@@ -6,11 +6,13 @@ import wget
 import os
 import requests
 from datetime import datetime
-
+from zipfile import ZipFile
+from urllib.request import urlopen 
 
 def getData(State=None):
     dir_list = os.listdir()
-    state_ids = pd.read_csv('us-state-ansi-fips.csv',skipinitialspace=True, dtype=str)
+    f = None
+    state_ids = pd.read_csv(r'https://raw.githubusercontent.com/Fair-Lines-America/FLA_basic_tools/main/data/us-state-ansi-fips.csv',skipinitialspace=True, dtype=str)
     st = state_ids[state_ids['st']==State]
     st = st['stname'].iloc[0]
     if '2020_PLSummaryFile_FieldNames.xlsx' not in dir_list:
@@ -112,9 +114,9 @@ def Overlap_old_new(new_districts, geoid='GEOID', district='District', leg=None)
                                         on=geoid,
                                         suffixes=('_old', '_new'))
     cross = cross.drop_duplicates()
-    new = new.drop(columns='GEOID20')
-    old = old.drop(columns='GEOID20')
-    cross = cross.drop(columns='GEOID20')
+    new = new.drop(columns=geoid)
+    old = old.drop(columns=geoid)
+    cross = cross.drop(columns=geoid)
     old = old.groupby([groupby_pop], as_index=False).sum()
     new = new.groupby([groupby_pop], as_index=False).sum()
     new_group = [district+'_old',district+'_new']
@@ -137,9 +139,9 @@ def Overlap_old_new(new_districts, geoid='GEOID', district='District', leg=None)
 def Overlap_compare(old_districts, new_districts, data, geoid='GEOID', district='District'):
 
 #####  CHECKS  ######
-    if district not in old_districts.columns or district not in new_districts.columns:
+    if district not in old_districts.columns and district not in new_districts.columns:
         raise Exception('District column not given or is missing from a DataFrame')
-    if geoid not in old_districts.columns or geoid not in new_districts.columns or geoid not in data.columns:
+    if geoid not in old_districts.columns and geoid not in new_districts.columns and geoid not in data.columns:
         raise Exception('GEOID column not given or is missing from a DataFrame')
 
 
