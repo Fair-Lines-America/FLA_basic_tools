@@ -4,6 +4,8 @@ README.md
 setup.cfg
 setup.py
 src/FLABasicTools/__init__.py
+src/FLABasicTools/__main__.py
+src/FLABasicTools/cli.py
 src/FLABasicTools/data_build.py
 src/FLABasicTools/geo_splits.py
 src/FLABasicTools/overlap.py
