@@ -44,3 +44,12 @@ Overlap_compare(old_districts, new_districts, data, geoid='GEOID', district='Dis
 - **data** - Data to append to the district Dataframes to create the population overlap analysis
 - **geoid** - GEOID column 
 - **disid** - District Name/Number Column
+
+
+CLI Walkthrough
+========
+
+```cil
+python -m FLABasicTools
+```
+**Follow The PROMPT**

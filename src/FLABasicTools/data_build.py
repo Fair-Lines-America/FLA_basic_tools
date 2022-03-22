@@ -7,7 +7,8 @@ import os
 import requests
 from datetime import datetime
 from zipfile import ZipFile
-from urllib.request import urlopen  
+from urllib.request import urlopen 
+from shapely.ops import unary_union 
 ########   
 #Data retrive / Data build Functions
 ########
@@ -55,24 +56,31 @@ def get_census_shp(fips=False, Geography=None, year=datetime.now().year-1):
 
 
 def assign_baf(baf, state, disid, geoid=None):
-    if isinstance(baf, pd.DataFrame) and (geoid is None and len(baf[geoid].iloc[0]) != 15):
+    if isinstance(baf, pd.DataFrame) and not isinstance(baf, gpd.GeoDataFrame) and (geoid is None and len(baf[geoid].iloc[0]) != 15):
         raise Exception('Need to include 15 digit GEOID for joiner')
     if isinstance(baf, gpd.GeoDataFrame) and 'geometry' not in baf.columns:
         raise Exception('Geopandas DataFrame need Geometry Column')
-    baf[geoid] = baf[geoid].astype('str')
     if isinstance(baf, gpd.GeoDataFrame):
         blk_df = get_census_shp(fips=state, Geography='TABBLOCK20')
         geoid = 'GEOID20'
+        blk_df['geometry'] = blk_df['geometry'].centroid
         out_df = gpd.sjoin(baf,blk_df)
         r = [i for i in out_df if i not in [disid,geoid]]
         out_txt = out_df.drop(columns=r)
         out_txt.to_csv(f'simple_{state}_baf.csv', index=False)
-
     elif isinstance(baf, pd.DataFrame):
+        baf[geoid] = baf[geoid].astype('str')
         blk_df = get_census_shp(fips=state, Geography='TABBLOCK20')
         blk_df = blk_df.rename(columns={'GEOID20':geoid})
         out_df = blk_df.merge(baf, on=geoid)
         out_shp = out_df[[disid,'geometry']]
-        out_shp.to_file(f'geo_{state}_baf.shp')
-    return out_df
+        dest = gpd.GeoDataFrame(columns=[disid, 'geometry'], geometry='geometry')
+        dist_list = list(set(out_shp[disid].tolist()))
+        for dist in dist_list:
+            df_temp = out_shp[out_shp[disid] == dist]
+            df_temp = df_temp.reset_index()
+            polygons = df_temp['geometry'].tolist()
+            df_temp['geometry'] = unary_union(polygons)
+            dest = dest.append(df_temp[[disid,'geometry']].iloc[0,:])
+        dest.to_file(f'geo_{state}_baf.shp')
         

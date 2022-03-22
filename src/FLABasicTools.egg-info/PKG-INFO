@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: FLABasicTools
-Version: 0.1.5
+Version: 0.1.6
 Summary: Basic tools for redistrict data used in reports
 Home-page: 
 Author: Robert Edwardes
@@ -66,4 +66,13 @@ Overlap_compare(old_districts, new_districts, data, geoid='GEOID', district='Dis
 - **data** - Data to append to the district Dataframes to create the population overlap analysis
 - **geoid** - GEOID column 
 - **disid** - District Name/Number Column
+
+
+CLI Walkthrough
+========
+
+```cil
+python -m FLABasicTools
+```
+**Follow The PROMPT**
 

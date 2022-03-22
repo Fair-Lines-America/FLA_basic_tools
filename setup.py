@@ -9,7 +9,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 setup(
     
     name='FLABasicTools',  
-    version='0.1.5',  
+    version='0.1.6',  
     description='Basic tools for redistrict data used in reports', 
     long_description=long_description, 
     long_description_content_type='text/markdown', 
@@ -29,7 +29,7 @@ setup(
     ],
     packages=find_packages(where='src'), 
     python_requires='>=3.6, <4',
-    install_requires=['pandas','bs4','wget','geopandas',''], 
+    install_requires=['pandas','bs4','wget','geopandas','shapely'], 
     package_dir={'': 'src'},
     include_package_data=True,
     package_data={'': ['data/*.csv']},
